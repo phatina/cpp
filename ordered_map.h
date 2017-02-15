@@ -172,7 +172,7 @@ public:
     template<class InputIt>
     void insert(InputIt first, InputIt last)
     {
-        for (const_iterator it = first; it != last; ++it)
+        for (auto it = first; it != last; ++it)
             add_index(it->first);
         map_.insert(first, last);
     }
