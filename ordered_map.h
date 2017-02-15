@@ -88,7 +88,7 @@ public:
     template<class InputIterator>
     ordered_map(InputIterator first, InputIterator last)
         : keys_{}
-        , compare_{keys_}
+        , compare_{&keys_}
         , map_{compare_}
     {
         for (auto it = first; it != last; ++it)
