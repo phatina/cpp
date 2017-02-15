@@ -28,7 +28,7 @@ template <typename Key, typename Index, typename Compare>
 class compare_helper
 {
 public:
-    compare_helper(std::map<Key, Index>& k)
+    compare_helper(std::map<Key, Index>* k)
         : keys_{k}
         , cmp_{}
     {
@@ -36,14 +36,14 @@ public:
 
     bool operator()(const Key& lhs, const Key& rhs) const
     {
-        const decltype(auto) lhs_{keys_.find(lhs)};
-        const decltype(auto) rhs_{keys_.find(rhs)};
+        const decltype(auto) lhs_{keys_->find(lhs)};
+        const decltype(auto) rhs_{keys_->find(rhs)};
 
         return cmp_(lhs_->second, rhs_->second);
     }
 
 private:
-    std::map<Key, Index>& keys_;
+    std::map<Key, Index>* keys_;
     Compare cmp_;
 };
 
@@ -80,7 +80,7 @@ public:
 public:
     ordered_map()
         : keys_{}
-        , compare_{keys_}
+        , compare_{&keys_}
         , map_{compare_}
     {
     }
