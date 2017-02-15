@@ -4,12 +4,13 @@
 #include <map>
 #include <vector>
 
-template <typename Key, typename Index = uint32_t>
-class ordered_map_compare
+template <typename Key, typename Index, typename Compare>
+class compare_helper
 {
 public:
-    ordered_map_compare(std::map<Key, Index>& k)
-        : keys_(k)
+    compare_helper(std::map<Key, Index>& k)
+        : keys_{k}
+        , cmp_{}
     {
     }
 
@@ -18,28 +19,26 @@ public:
         const decltype(auto) lhs_{keys_.find(lhs)};
         const decltype(auto) rhs_{keys_.find(rhs)};
 
-        if (lhs_ == std::end(keys_))
-            return false;
-        else if (rhs_ == std::end(keys_))
-            return true;
-
-        return lhs_->second < rhs_->second;
+        return cmp_(lhs_->second, rhs_->second);
     }
 
 private:
     std::map<Key, Index>& keys_;
+    Compare cmp_;
 };
 
 template <
     typename Key,
     typename T,
-    typename Compare = ordered_map_compare<Key>,
+    typename Index = uint64_t,
+    typename Compare = std::less<Index>,
     typename Allocator = std::allocator<std::pair<const Key, T>>>
 class ordered_map
 {
 public:
-    using BaseType = std::map<Key, T, Compare, Allocator>;
-    using KeyContainer = std::map<Key, uint32_t>;
+    using CompareHelper = compare_helper<Key, Index, Compare>;
+    using InnerMapType = std::map<Key, T, CompareHelper, Allocator>;
+    using KeyContainer = std::map<Key, Index>;
 
     using key_type = Key;
     using mapped_type = T;
@@ -53,10 +52,10 @@ public:
     using pointer = typename std::allocator_traits<Allocator>::pointer;
     using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
 
-    using iterator = typename BaseType::iterator;
-    using const_iterator = typename BaseType::const_iterator;
-    using reverse_iterator = typename BaseType::reverse_iterator;
-    using const_reverse_iterator = typename BaseType::const_reverse_iterator;
+    using iterator = typename InnerMapType::iterator;
+    using const_iterator = typename InnerMapType::const_iterator;
+    using reverse_iterator = typename InnerMapType::reverse_iterator;
+    using const_reverse_iterator = typename InnerMapType::const_reverse_iterator;
 
 public:
     ordered_map()
@@ -242,8 +241,9 @@ private:
     void remove_index(const Key& key) { keys_.erase(key); }
 
     KeyContainer keys_;
-    Compare compare_;
-    BaseType map_;
+    CompareHelper compare_;
+    InnerMapType map_;
+    Index index_ = 0;
 };
 
 #endif // __ORDERED_MAP_H
