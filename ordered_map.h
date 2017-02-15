@@ -154,7 +154,7 @@ public:
     std::pair<iterator, bool> insert( P&& value )
     {
         add_index(value.first);
-        return map_.insert(value);
+        return map_.insert(std::forward<P>(value));
     }
 
     iterator insert(const_iterator hint, const value_type& value)
