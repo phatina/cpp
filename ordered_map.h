@@ -21,6 +21,7 @@
 #ifndef __ORDERED_MAP_H
 #define __ORDERED_MAP_H
 
+#include <algorithm>
 #include <map>
 #include <vector>
 
@@ -115,6 +116,17 @@ public:
     {
         add_index(key);
         return map_[key];
+    }
+
+    std::vector<Key> keys() const
+    {
+        std::vector<Key> k(keys_.size());
+        std::transform(
+            std::begin(*this),
+            std::end(*this),
+            std::begin(k),
+            [](const auto& p){ return p.first; });
+        return k;
     }
 
     iterator begin() noexcept { return map_.begin(); }
