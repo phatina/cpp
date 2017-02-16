@@ -89,7 +89,7 @@ public:
     template<class InputIterator>
     ordered_map(InputIterator first, InputIterator last)
         : keys_{}
-        , compare_{keys_}
+        , compare_{&keys_}
         , map_{compare_}
     {
         for (auto it = first; it != last; ++it)
@@ -166,7 +166,7 @@ public:
     std::pair<iterator, bool> insert( P&& value )
     {
         add_index(value.first);
-        return map_.insert(value);
+        return map_.insert(std::forward<P>(value));
     }
 
     iterator insert(const_iterator hint, const value_type& value)
@@ -184,7 +184,7 @@ public:
     template<class InputIt>
     void insert(InputIt first, InputIt last)
     {
-        for (const_iterator it = first; it != last; ++it)
+        for (auto it = first; it != last; ++it)
             add_index(it->first);
         map_.insert(first, last);
     }
