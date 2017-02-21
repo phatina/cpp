@@ -78,6 +78,15 @@ public:
     using reverse_iterator = typename InnerMapType::reverse_iterator;
     using const_reverse_iterator = typename InnerMapType::const_reverse_iterator;
 
+private:
+    void add_index(const Key& key) { keys_.insert({key, index_++}); }
+    void remove_index(const Key& key) { keys_.erase(key); }
+
+    KeyContainer keys_;
+    CompareHelper compare_;
+    InnerMapType map_;
+    Index index_ = 0;
+
 public:
     ordered_map()
         : keys_{}
@@ -234,6 +243,10 @@ public:
     }
 
     void swap(ordered_map& other)
+        noexcept(
+            noexcept(std::swap(map_, other.map_)) &&
+            noexcept(std::swap(compare_, other.compare_)) &&
+            noexcept(std::swap(keys_, other.keys_)))
     {
         std::swap(map_, other.map_);
         std::swap(compare_, other.compare_);
@@ -267,15 +280,6 @@ public:
     bool operator<=(const ordered_map& rhs) const { return map_ <= rhs.map_; }
     bool operator> (const ordered_map& rhs) const { return map_ >  rhs.map_; }
     bool operator>=(const ordered_map& rhs) const { return map_ >= rhs.map_; }
-
-private:
-    void add_index(const Key& key) { keys_.insert({key, index_++}); }
-    void remove_index(const Key& key) { keys_.erase(key); }
-
-    KeyContainer keys_;
-    CompareHelper compare_;
-    InnerMapType map_;
-    Index index_ = 0;
 };
 
 #endif // __ORDERED_MAP_H
